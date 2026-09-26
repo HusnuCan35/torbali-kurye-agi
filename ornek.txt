@@ -1,0 +1,186 @@
+Teslimat operasyonunu şansa bırakmayan altyapı
+Sipariş düştüğü saniyeden hakediş hesabına kadar her adım tek bir motorda çalışır: entegrasyon, akıllı atama, rota, canlı takip, tahsilat ve muhasebe. Türkiye’nin en yaygın kurye ağı, paketini sıfır müdahaleyle dağıtan bir sistemle çalışıyor.
+
+SİPARİŞİNİZ NEREDEN GELİRSE GELSİN AYNI EKRANA DÜŞER
+
+Restoran ya da POS firması sahibiyseniz, kullandığınız sistemi bize söyleyin — bağlı mı, değilse ne kadar sürede bağlanır,net olarak cevaplayalım.
+
+Teslimat büyüdü, marj küçüldü
+Paket servis artık işin yan dalı değil. Ama aynı hızda büyüyen bir şey daha var: her siparişin üzerindeki görünmeyen maliyet. Aşağıdakiler bizim iddiamız değil, sektörün ortak tablosu.
+
+%25–30
+
+Pazaryeri komisyonu
+Online sipariş platformlarının aldığı komisyon, üzerine paket malzemesi ve kampanya katılım bedelleri eklendiğinde kârın büyük kısmını götürüyor.
+
+38.000 ₺
+
+Tek kuryenin aylık yükü
+Deneyimli bir moto kurye için maaş bandı; buna yakıt, bakım, sigorta ve devamsızlık riski ekleniyor. Sabit kadro, dalgalı sipariş hacmine göre pahalı bir çözüm.
+
+32 dk
+
+Atanamayan siparişin bedeli
+Yoğun saatte kurye atanamayan sipariş soğuyor, iptal oluyor ve puanınıza yazılıyor. Kayıp yalnızca o sipariş değil, o müşteri.
+
+%22 → %38
+
+Hızlı servisin payı
+Hızlı servis restoranlarının yeme-içme pazarındaki payı 2019’dan 2025’e böyle büyüdü. Teslimat artık bir ek hizmet değil, işin kendisi.
+
+Bu tabloyu değiştirmenin yolu daha çok çalışmak değil,operasyonun her adımını ölçülebilir hale getirmek. Hizir Paket tam olarak bunu yapar — nasıl olduğunu aşağıda adım adım izleyebilirsiniz.
+
+Bir sipariş altı adımda teslim ediliyor ve muhasebeleşiyor
+Gün sonu kapanışı sizi beklemez
+Kurye hakedişleri, işletme hizmet bedelleri, kesintiler ve prim hesabı gün içinde işlenir. Dönem sonunda fatura tek tuşla oluşur; Excel’de çakıştırma dönemi biter.
+
+Türkiye’nin en yaygın kurye operasyon ağı
+Bu işi bir ürün olarak değil, her akşam 80’in üzerinde bölgede aynı anda çalışması gereken bir altyapı olarak kuruyoruz. Aşağıdaki rakamlar iddiadan değil, o operasyonun günlük gerçeğinden geliyor.
+
+80+
+
+Bölge bayisi
+
+Türkiye’de en yaygın kurye operasyon ağı. Sektör liderliği tabela değil, saha karşılığı olan bir rakam.
+
+%100
+
+Çalışma sürekliliği
+
+Sistem ayakta kalır. Servis saatinizin ortasında panelin kapanması diye bir gündemimiz olmadı.
+
+4.500+
+
+Yayınlanan güncelleme
+
+Ürün durmuyor. Sahadan gelen her ihtiyaç geliştirme sırasına giriyor ve gerçekten yayına çıkıyor.
+
+7/24
+
+Gerçek teknik destek
+
+Her bayiye özel destek grubu kurulur. Ticket sırası beklemez, doğrudan geliştiren ekiple konuşursunuz.
+
+Sıfır müdahaleli otomatik paket
+Sektörde eşi olmayan tarafımız: siparişin girişinden kuryeye atanmasına kadar hiç kimsenin dokunmadığı bir akış. Bugün bayilerimiz arasında paketlerini tamamen otomatik dağıtanlar var — operatör yalnızca istisnalara bakıyor.
+
+En geniş entegrasyon altyapısı
+Yemek pazaryerleri, POS ve adisyon programları, kendi yazılımınız — hangisi olursa olsun bağlanacak bir yolu var. Bu alanda sektördeki en geniş hazır entegrasyon setine sahibiz.
+
+White-label: sistem sizin adınızla çalışır
+Kendi markanız, kendi alan adınız, kendi renkleriniz. Müşteriniz ve kuryeniz sizin markanızı görür; altyapı arkada bizim tarafımızdan işletilir ve güncellenir.
+
+İhtiyaca özel geliştirme
+Hayal edilebilen hemen her şeyi yapabiliyoruz. Kuryelerle merkez arasındaki dahili telsiz (bas-konuş) altyapısı bunun somut örneği — talep geldi, tasarladık, sahaya indirdik.
+
+Yalnızca yazılım değil, kaynak da
+İhtiyacınız kurye ise kurye, işletme ise işletme tarafında da destek veriyoruz. Bayilerimiz hem sistemi hem de büyüme desteğini aynı yerden alıyor.
+
+Hız, tesadüf değil tercih
+Panelin açılma süresinden atama kararına kadar her adım ölçülür ve optimize edilir. Yoğun saatte yavaşlayan bir sistem, olmayan bir sistemle aynı kapıya çıkar.
+
+Aynı sistem, üç farklı taraf için
+Bir teslimat üç kişiyi aynı anda ilgilendirir: siparişi hazırlayan, paketi taşıyan ve operasyonu işleten. Yandaki harita, o üçünü buluşturan otomatik atama motorunun canlı simülasyonudur.
+
+Kurulu bir sistemin üzerine oturun
+Bölgenizde kurye operasyonu kurmak isteyenler için yazılım, marka ve işletme modeli hazır. Sıfırdan yazılım yaptırma, tahsilat sistemi kurma, muhasebe altyapısı geliştirme yükünü almazsınız.
+
+İlk günden çalışan altyapı
+
+Panel, mobil uygulama, atama motoru, muhasebe ve raporlama devreye alınmış halde teslim edilir.
+
+Kendi markanız, kendi alan adınız
+
+Çok kiracılı mimari sayesinde operasyonunuz kendi alan adınız ve renklerinizle çalışır.
+
+Bölge tanımı ve koruma
+
+Çalışma alanınız haritada tanımlanır; iş modeliniz net sınırlar üzerine kurulur.
+
+Eğitim ve sürekli destek
+
+Operasyon kurulumu, personel eğitimi ve teknik destek süreç boyunca yanınızda.
+
+OTOMATİK ATAMA · CANLI SİMÜLASYON
+
+Sistem çalışıyor
+
+Sipariş bekleniyor
+
+Görünen panelin altında çalışan mühendislik
+Kurye yazılımı, gün içinde binlerce konum güncellemesini, para hareketini ve durum değişikliğini kaybetmeden taşımak zorundadır. Altyapımız tam olarak bu yük için kuruldu.
+
+< 1 sn
+
+DURUM YAYILIM SÜRESİ
+
+Gerçek zamanlı çekirdek
+Konum, sipariş durumu ve telsiz sinyalleri kalıcı soket bağlantısı üzerinden akar. JWT ile kimliklendirilmiş, kiracı bazında izole edilmiş kanallar; sayfa yenilemeye gerek kalmadan güncel ekran.
+
+80+
+
+BAĞIMSIZ BAYİ / MARKA
+
+Çok kiracılı, white-label mimari
+Tek çekirdek, onlarca marka ve alan adı. Her bayi kendi markasıyla çalışır; verisi, kullanıcıları ve raporu diğerlerinden yalıtılmıştır. Çekirdek geliştikçe herkes aynı anda faydalanır.
+
+30+
+
+HAZIR ENTEGRASYON
+
+Sektörün en geniş entegrasyon katmanı
+Pazaryerleri, POS ve adisyon programları için hazır bağlayıcılar; kendi yazılımınız için dokümante edilmiş REST API ve durum bildirimleri. Listede olmayan sistem için bağlayıcı yazarız.
+
+8
+
+AYRI ÖDEME/HAREKET TİPİ
+
+Muhasebe motoru
+Ödeme tipleri, hakedişler, kesintiler, avanslar ve firma hizmet bedelleri tek bir hesaplama çekirdeğinden geçer. Rapor ile fatura arasında fark oluşmaz.
+
+m²
+
+POLİGON BAZLI BÖLGE TANIMI
+
+Harita ve coğrafi hesap
+Bölge poligonları, mesafe ve ekstra kilometre hesapları, ısı haritaları ve rota çizimi; operasyonun coğrafyasını tahmine değil ölçüme dayandırır.
+
+7/24
+
+KESİNTİSİZ SAHA AKIŞI
+
+Saha uygulaması ve telsiz
+Arka planda çalışan konum servisi, çevrimdışı kuyruk, bildirim ve kask üzerinden bas-konuş telsiz. Bu telsiz altyapısını sahadan gelen talep üzerine biz tasarladık — özel geliştirme bizde istisna değil, rutin.
+
+Bu altyapının tek bir pratik karşılığı var: panelinizde gördüğünüz rakam ile sahadaki gerçek aynı olur. Rapor ile fatura, kasa ile hakediş, harita ile kurye birbirini tutar.
+
+Her akşam gerçek bir servis saatinde sınanıyor
+Zincir markalardan mahalle işletmesine, tek şubeden çok bölgeli operasyona kadar farklı ölçeklerde çalışıyoruz. Aşağıdakiler günlük olarak bu sistemi kullanan işletmelerden bazıları.
+
+Karar vermeden önce sorulan sorular
+Hangi taraftan bakıyorsanız o sekmeyi açın — sorular ve cevaplar size göre ayrıldı.
+
+Kendi kuryem var, yine de kullanabilir miyim?
+Kullandığımız sistemle entegre çalışır mısınız?
+Kurulum ne kadar sürer, teknik bilgi gerekir mi?
+Yoğun saatte kurye bulamama riski ne olacak?
+Paket atamayı tamamen otomatiğe alabilir miyiz?
+Müşterim paketini takip edebilir mi?
+Ücretlendirme nasıl işliyor?
+Verilerim ve müşteri bilgilerim güvende mi?
+Cevabını bulamadığınız bir soru mu var? Operasyonunuzu birlikte konuşalım — kendi rakamlarınızla ne anlama geldiğini birkaç dakikada görürsünüz.
+
+Bir sonraki servis saatine hazır girin
+Hangi taraftan bakıyorsanız oradan başlayın. Kurulum aynı gün tamamlanır, taahhüt istemeyiz.
+
+İşletmeyim
+Kurye kadrosu kurmadan teslimat yapmak, tüm kanalları tek panelde toplamak istiyorum.
+
+Bayi olmak istiyorum
+Bölgemde kurye operasyonu kurmak ve hazır bir yazılım altyapısıyla başlamak istiyorum.
+
+Kuryeyim
+Esnek saatlerle çalışmak ve kazancımı şeffaf şekilde takip etmek istiyorum.
+
+Önce konuşmayı tercih ederim:
+

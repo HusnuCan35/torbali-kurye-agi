@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Torbalı Kurye Ağı — Operasyon Masası</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="./shared.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/motion@11.13.1/dist/motion.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Inter:wght@400;500;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1c1a15; --paper:#fffdf7; --cream:#f4eee1; --orange:#ff4d00; --moss:#0c3b2e; --sun:#ffc531; }
+  body { background: var(--cream); color: var(--ink); font-family: Inter, system-ui, sans-serif;
+    background-image: radial-gradient(#d8cfb8 1px, transparent 1px); background-size: 22px 22px; }
+  .display { font-family: "Bricolage Grotesque", sans-serif; }
+  .hand { font-family: Caveat, cursive; }
+  .card { background: var(--paper); border: 1.5px solid var(--ink); border-radius: 18px; box-shadow: 5px 5px 0 var(--ink); }
+  .ticket { position: relative; }
+  .ticket::after { content:""; position:absolute; left:12px; right:12px; bottom:-2px; border-bottom:2px dashed #c9bfa6; }
+  .btn-ink { border:1.5px solid var(--ink); box-shadow:3px 3px 0 var(--ink); transition:transform .12s ease, box-shadow .12s ease; }
+  .btn-ink:active { transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink); }
+  .sticker { transform: rotate(-4deg); }
+  #map { height:100%; min-height:540px; border-radius:14px; z-index:0; background:#e9e2d2; }
+  .leaflet-container { font-family: Inter, sans-serif; }
+  .zone-tab.active { background: var(--ink); color: #fff; }
+  ::-webkit-scrollbar { width:8px; height:8px; } ::-webkit-scrollbar-thumb { background:#1c1a15; border-radius:8px; }
+  .order-sel { outline:3px solid var(--orange); }
+  .blink { animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { background:#ffe1d1; } }
+  .marquee { overflow:hidden; white-space:nowrap; }
+  .marquee span { display:inline-block; animation: mq 22s linear infinite; }
+  @keyframes mq { from { transform:translateX(0);} to { transform:translateX(-50%);} }
+  .shop-tip{ background:#1c1a15 !important; color:#f4eee1 !important; border:1.5px solid #f4eee1 !important; border-radius:999px !important; font-size:11px !important; font-weight:700 !important; padding:2px 10px !important; box-shadow:2px 2px 0 rgba(0,0,0,.35) !important; font-family:Inter,sans-serif; }
+  .shop-tip::before{ display:none !important; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ÜST ŞERİT -->
+<div class="bg-[#1c1a15] text-[#f4eee1] text-xs py-1.5 marquee display tracking-wide">
+  <span class="px-4">TORBALI MAH. • CUMHURİYET MAH. • TEPEKÖY MAH. • CANLI OPERASYON MASASI • OTOMATİK ATAMA AÇIK • TORBALI MAH. • CUMHURİYET MAH. • TEPEKÖY MAH. • CANLI OPERASYON MASASI • OTOMATİK ATAMA AÇIK •&nbsp;</span>
+</div>
+
+<header class="max-w-[1400px] mx-auto px-4 pt-4 flex flex-wrap items-center gap-3">
+  <div class="card px-4 py-3 flex items-center gap-3">
+    <div class="w-11 h-11 rounded-2xl bg-[#ff4d00] border-[1.5px] border-[#1c1a15] flex items-center justify-center text-2xl" style="box-shadow:3px 3px 0 #1c1a15">🛵</div>
+    <div>
+      <div class="display font-extrabold text-xl leading-none">Torbalı Kurye Ağı</div>
+      <div class="text-xs opacity-60">operasyon masası • prototip v0.2 • <span id="clock" class="font-bold">--:--</span></div>
+    </div>
+    <div class="sticker ml-2 bg-[#ffc531] border-[1.5px] border-[#1c1a15] rounded-lg px-2 py-1 text-xs font-bold">CANLI ●</div>
+  </div>
+
+  <div class="card px-2 py-2 flex gap-1.5 items-center" id="zones">
+    <button data-z="all" class="zone-tab active text-sm font-bold px-3 py-1.5 rounded-xl border-[1.5px] border-[#1c1a15]">Tümü</button>
+    <button data-z="Torbalı Mah." class="zone-tab text-sm font-bold px-3 py-1.5 rounded-xl border-[1.5px] border-[#1c1a15]">Torbalı Mah.</button>
+    <button data-z="Cumhuriyet Mah." class="zone-tab text-sm font-bold px-3 py-1.5 rounded-xl border-[1.5px] border-[#1c1a15]">Cumhuriyet Mah.</button>
+    <button data-z="Tepeköy Mah." class="zone-tab text-sm font-bold px-3 py-1.5 rounded-xl border-[1.5px] border-[#1c1a15]">Tepeköy Mah.</button>
+  </div>
+
+  <div class="ml-auto flex gap-2 items-center">
+    <label class="card px-3 py-2 text-xs font-bold flex items-center gap-2"><input type="checkbox" id="autoMode" checked class="w-4 h-4 accent-[#ff4d00]"> oto-atama</label>
+    <button onclick="simulateOrder()" class="btn-ink bg-white rounded-xl px-4 py-2 text-sm font-bold">+ Sipariş</button>
+    <button onclick="autoDispatchAll()" class="btn-ink bg-[#ff4d00] text-white rounded-xl px-4 py-2 text-sm font-extrabold">⚡ Otomatik Ata</button>
+    <button onclick="if(confirm('Demo verisi sıfırlansın mı?')){KX.reset();}" class="text-xs underline opacity-60">sıfırla</button>
+    <a href="kurye.html" target="_blank" class="btn-ink bg-[#0c3b2e] text-white rounded-xl px-4 py-2 text-sm font-bold">📱 Kurye ekranı ↗</a>
+  </div>
+</header>
+
+<p class="max-w-[1400px] mx-auto px-5 mt-1 hand text-xl opacity-70">← panelden ata, kurye telefonunda anında görsün — ikisi aynı motora bağlı, ayrı sekmede açıp dene!</p>
+
+<!-- SKOR KARTLARI -->
+<div class="max-w-[1400px] mx-auto px-4 mt-2 grid grid-cols-2 md:grid-cols-5 gap-3" id="stats"></div>
+
+<!-- ANA IZGARA -->
+<div class="max-w-[1400px] mx-auto px-4 mt-3 grid lg:grid-cols-[310px_1fr_300px] gap-3 pb-4">
+
+  <div class="card p-3 flex flex-col max-h-[calc(100vh-240px)] min-h-[400px]">
+    <div class="flex items-baseline justify-between"><h2 class="display font-extrabold">Siparişler</h2><span id="qCount" class="text-xs font-bold bg-[#1c1a15] text-white rounded-full px-2 py-0.5">0</span></div>
+    <div class="text-[11px] opacity-60 mb-2">fişin üstüne tıkla → sağdan kuryeye ata</div>
+    <div id="orderList" class="space-y-2.5 overflow-y-auto flex-1 pr-1"></div>
+  </div>
+
+  <div class="flex flex-col gap-3">
+    <div class="card p-2">
+      <div class="flex items-center gap-2 px-2 pt-1 pb-2 text-xs">
+        <span class="font-bold">🗺️ Torbalı canlı harita</span>
+        <span class="opacity-60">• harita açılmıyorsa sağ üst katman düğmesinden sağlayıcı değiştir (bazı ağlar openstreetmap.org'u engeller)</span>
+        <span id="syncBadge" class="ml-auto bg-green-100 border border-green-800 text-green-900 font-bold px-2 py-0.5 rounded-full">● senkron</span>
+      </div>
+      <div id="map"></div>
+      <div class="flex gap-2 px-1 pt-2 text-[11px] font-bold">
+        <span class="bg-white border-[1.5px] border-[#1c1a15] rounded-full px-2 py-0.5">🟠 restoran</span>
+        <span class="bg-white border-[1.5px] border-[#1c1a15] rounded-full px-2 py-0.5">🔵 boşta kurye</span>
+        <span class="bg-white border-[1.5px] border-[#1c1a15] rounded-full px-2 py-0.5">🟣 dolu</span>
+        <span class="bg-white border-[1.5px] border-[#1c1a15] rounded-full px-2 py-0.5">🟢 teslimat</span>
+      </div>
+    </div>
+    <div class="card p-3">
+      <div class="flex items-center justify-between"><h2 class="display font-extrabold text-sm">⚙️ Atama motoru günlüğü</h2><span class="text-[11px] opacity-60">yakınlık skorlu • iki ekran da aynı günlüğü görür</span></div>
+      <div id="log" class="mt-2 h-32 overflow-y-auto text-xs font-mono bg-[#1c1a15] text-[#f4eee1] rounded-xl p-3"></div>
+    </div>
+  </div>
+
+  <div class="card p-3 flex flex-col max-h-[calc(100vh-240px)] min-h-[400px]">
+    <h2 class="display font-extrabold">Kuryeler <span class="hand text-lg font-semibold opacity-70">— 4 kişi, gerçek kadro</span></h2>
+    <div id="courierList" class="mt-2 space-y-2.5 overflow-y-auto flex-1 pr-1"></div>
+    <div class="mt-2 text-[11px] bg-[#f4eee1] border-[1.5px] border-dashed border-[#1c1a15] rounded-xl p-2">Skor = mesafe %50 + yük %25 + performans %15 + mahalle %10. Kuryenin üstündeki paket, puanı düşürür.</div>
+  </div>
+</div>
+
+<script>
+/* ---------- TORBALI VERİSİ ---------- */
+const RESTAURANTS = [
+  { id:'R1', name:'Burger Ding', zone:'Tepeköy Mah.', lat:38.1483, lng:27.3598, addr:'Tepeköy, Hükümet Cd. No:3' },
+  { id:'R2', name:'Naydanoz Döner', zone:'Torbalı Mah.', lat:38.1522, lng:27.3485, addr:'Ertuğrul, Kazım Dirik Cd. No:61 D:B' },
+  { id:'R3', name:'Beybos Döner', zone:'Torbalı Mah.', lat:38.1531, lng:27.3470, addr:'Ertuğrul, Kazım Dirik Cd. No:82/A' },
+  { id:'R4', name:'Komadene Çiğköfte', zone:'Tepeköy Mah.', lat:38.1438, lng:27.3633, addr:'Tepeköy, İsmetpaşa Cd. No:50' },
+];
+const SPOTS = [
+  [38.1505,27.3540,'Torbalı Mah.','Atatürk Meydanı No:3'],
+  [38.1518,27.3495,'Torbalı Mah.','Kazım Dirik Cd. No:44'],
+  [38.1575,27.3605,'Cumhuriyet Mah.','Cumhuriyet Cad. No:41 D:2'],
+  [38.1550,27.3630,'Cumhuriyet Mah.','Okul Sk. No:7'],
+  [38.1460,27.3615,'Tepeköy Mah.','Hükümet Cd. No:21'],
+  [38.1445,27.3645,'Tepeköy Mah.','İsmetpaşa Cd. No:63'],
+  [38.1495,27.3505,'Torbalı Mah.','Sanayi Sitesi 4. Blok'],
+  [38.1535,27.3460,'Torbalı Mah.','Ertuğrul Parkı karşısı No:9'],
+];
+let zoneFilter = 'all', selectedOrderId = null;
+const INITIALS = { K1:'OŞ', K2:'HÇ', K3:'Mİ', K4:'MU' };
+
+/* ---------- HARİTA (engelli ağlara dayanıklı: 3 sağlayıcı) ---------- */
+const map = L.map('map').setView([38.1498, 27.3555], 14);
+const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains:'abcd', maxZoom:20, attribution:'© OpenStreetMap © CARTO' });
+const osmDE = L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' });
+const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom:19, attribution:'© Esri' });
+carto.addTo(map);
+L.control.layers({ 'Şık harita (CARTO — önerilen)':carto, 'Sade (OSM Almanya)':osmDE, 'Esri sokak':esri }).addTo(map);
+// CARTO da engellenirse otomatik OSM-DE'ye düş
+carto.on('tileerror', function(){ try{ map.removeLayer(carto); osmDE.addTo(map); note('Harita sağlayıcısı otomatik değişti (ağ engeli).'); }catch(e){} });
+
+function dot(color, txt){
+  return L.divIcon({ html:`<div style="background:${color};min-width:36px;height:36px;padding:0 8px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid #1c1a15;box-shadow:3px 3px 0 #1c1a15;transform:translate(-50%,-50%)">${txt}</div>`, iconSize:[0,0] });
+}
+function courierIcon(c){
+  const col = !c.online ? '#a8a29e' : c.load>=2 ? '#7c3aed' : '#16a34a';
+  const first = c.name.split(' ')[0];
+  return L.divIcon({ html:`<div style="display:flex;align-items:center;gap:5px;background:#fffdf7;border:2px solid #1c1a15;border-radius:999px;padding:3px 10px 3px 7px;font-size:12px;font-weight:800;color:#1c1a15;box-shadow:3px 3px 0 #1c1a15;white-space:nowrap;transform:translate(-50%,-50%)"><span style="width:10px;height:10px;border-radius:50%;background:${col};border:1.5px solid #1c1a15;display:inline-block"></span>🛵 ${first}</div>`, iconSize:[0,0] });
+}
+const ICON = { rest:dot('#ff4d00','🍔'), dest:dot('#16a34a','📍') };
+const marks = { c:{}, o:{} };
+RESTAURANTS.forEach(r => {
+  L.marker([r.lat,r.lng],{icon:ICON.rest}).addTo(map)
+    .bindPopup(`<b>${r.name}</b><br>${r.addr}<br><span style="opacity:.6">${r.zone} • 35860 Torbalı/İzmir</span>`)
+    .bindTooltip(r.name, { permanent:true, direction:'top', offset:[0,-24], className:'shop-tip' });
+});
+// mahalle etiketleri
+[['Torbalı Mah.',38.1535,27.3510],['Cumhuriyet Mah.',38.1585,27.3620],['Tepeköy Mah.',38.1395,27.3640]].forEach(([n,la,ln])=>{
+  L.marker([la,ln],{icon:L.divIcon({html:`<div style="background:#1c1a15;color:#f4eee1;font-size:11px;font-weight:700;padding:2px 10px;border-radius:999px;border:1.5px solid #f4eee1">${n}</div>`,iconSize:[110,24],iconAnchor:[55,12]}),interactive:false}).addTo(map);
+});
+
+/* ---------- YARDIMCILAR ---------- */
+function km(a,b,c,d){ const R=6371,r=Math.PI/180,x=(c-a)*r,y=(d-b)*r,h=Math.sin(x/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(y/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+function money(n){ return n.toLocaleString('tr-TR')+' ₺'; }
+function note(m){ const el=document.createElement('div'); el.innerHTML=`<span style="opacity:.5">${new Date().toLocaleTimeString('tr-TR')}</span> ${m}`; const box=document.getElementById('log'); if(box){box.prepend(el);} }
+function pop(el){ if(window.Motion&&Motion.animate){ try{ Motion.animate(el,{transform:['translateY(14px) scale(.97)','translateY(0) scale(1)'],opacity:[0,1]},{duration:.35,easing:'cubic-bezier(.22,1,.36,1)'}); return;}catch(e){} } el.animate([{transform:'translateY(14px)',opacity:0},{transform:'translateY(0)',opacity:1}],{duration:300,easing:'cubic-bezier(.22,1,.36,1)'}); }
+
+function scoreCourier(c, order){
+  const rest = RESTAURANTS.find(r=>r.id===order.restId);
+  const d = km(c.lat,c.lng,rest.lat,rest.lng);
+  const dist = d<=1?50:d<=2?40:d<=3.5?25:0;
+  const load = c.load===0?25:c.load===1?20:c.load===2?5:-100;
+  const perf = (c.perf/100)*15;
+  const zone = (c.zone||order.zone) ? 10 : 8;
+  return { total:Math.round(dist+load+perf+zone), dist:d.toFixed(2) };
+}
+
+/* ---------- İŞ MANTIĞI (senkron: KX üzerinden) ---------- */
+function simulateOrder(){
+  const rest = RESTAURANTS[Math.floor(Math.random()*RESTAURANTS.length)];
+  const spot = SPOTS[Math.floor(Math.random()*SPOTS.length)];
+  // %70 ihtimalle filtrenin mahallesinden getir (denemesi kolay olsun)
+  KX.commit(s=>{
+    const id = ++s.seq;
+    s.orders.push({ id, restId:rest.id, restName:rest.name, zone:spot[2], dlat:spot[0], dlng:spot[1], addr:spot[3],
+      amount:150+Math.floor(Math.random()*400), pay:Math.random()>0.4?'Online ödendi':'Nakit (kapıda)',
+      status:'queued', age:0, courierId:null, courierName:null });
+  }, `📥 Sipariş düştü → ${rest.name} → ${spot[2]} • ${spot[3]}`);
+  if(document.getElementById('autoMode').checked) setTimeout(()=>{ const last=KX.state.orders[KX.state.orders.length-1]; if(last) autoDispatch(last.id); }, 800);
+}
+function autoDispatch(orderId){
+  const s = KX.state, o = s.orders.find(x=>x.id===orderId);
+  if(!o||o.status!=='queued') return;
+  const cands = s.couriers.filter(c=>c.online&&c.load<3).map(c=>({c,...scoreCourier(c,o)})).sort((a,b)=>b.total-a.total);
+  if(!cands.length||cands[0].total<=0){ KX.commit(()=>{}, `⚠️ #${o.id}: uygun kurye YOK — manuel ata!`); return; }
+  const win = cands[0];
+  KX.commit(()=>{}, `🧠 #${o.id} skor → `+cands.slice(0,4).map(x=>`${x.c.name.split(' ')[0]}:${x.total} (${x.dist}km)`).join(' • '));
+  assign(o.id, win.c.id, true);
+}
+function autoDispatchAll(){
+  const q = KX.state.orders.filter(o=>o.status==='queued');
+  if(!q.length){ note('Kuyruk boş — önce sipariş oluştur.'); return; }
+  q.forEach((o,i)=>setTimeout(()=>autoDispatch(o.id), i*600));
+}
+function assign(orderId, courierId, auto){
+  const s0 = KX.state.orders.find(x=>x.id===orderId);
+  if(!s0||s0.status!=='queued'){ note(`#${orderId} zaten işlemde.`); return; }
+  KX.commit(s=>{
+    const o=s.orders.find(x=>x.id===orderId), c=s.couriers.find(x=>x.id===courierId);
+    o.status='assigned'; o.courierId=c.id; o.courierName=c.name; o.assignedAt=Date.now();
+    c.load++; c.status=c.load>=2?'dolu':'meşgul';
+  }, `${auto?'⚡ OTOMATİK':'👆 MANUEL'} atama: #${orderId} → ${KX.state.couriers.find(c=>c.id===courierId).name}`);
+  setTimeout(()=>{ KX.commit(s=>{ const o=s.orders.find(x=>x.id===orderId); if(o&&o.status==='assigned') o.status='picked'; }, `📦 #${orderId} paketi aldı.`); }, 6000);
+  setTimeout(()=>{ KX.commit(s=>{
+    const o=s.orders.find(x=>x.id===orderId); if(!o||o.status==='delivered') return;
+    o.status='delivered'; o.deliveredAt=Date.now();
+    const c=s.couriers.find(x=>x.id===o.courierId); if(c){ c.load=Math.max(0,c.load-1); c.status=c.load===0?'boşta':'meşgul'; }
+    s.delivered++; s.revenue+=80;
+  }, `✅ #${orderId} TESLİM → hakediş +45₺, hizmet +35₺`); }, 15000);
+}
+
+/* ---------- RENDER (her state değişiminde iki ekranda da çalışır) ---------- */
+function render(s){
+  const q = s.orders.filter(o=>o.status==='queued');
+  const a = s.orders.filter(o=>['assigned','picked'].includes(o.status));
+  document.getElementById('stats').innerHTML = [
+    ['Kuyruk', q.length, '#ff4d00', 'atanmamış'],
+    ['Aktif', a.length, '#2563eb', 'kurye üstünde'],
+    ['Teslim', s.delivered, '#16a34a', 'bugün'],
+    ['Online', s.couriers.filter(c=>c.online).length+'/4', '#1c1a15', 'kurye'],
+    ['Hacim', money(s.revenue), '#0c3b2e', 'hakediş+hizmet'],
+  ].map(([t,v,c,sub])=>`<div class="card ticket p-3"><div class="display font-extrabold text-2xl" style="color:${c}">${v}</div><div class="text-xs font-bold">${t}</div><div class="text-[11px] opacity-60">${sub}</div></div>`).join('');
+  document.getElementById('qCount').textContent = q.length;
+
+  // siparişler
+  const box = document.getElementById('orderList'); box.innerHTML='';
+  const list = [...s.orders].reverse().filter(o=>zoneFilter==='all'||o.zone===zoneFilter).slice(0,30);
+  if(!list.length) box.innerHTML='<div class="text-xs opacity-60 text-center py-8">Bu mahallede sipariş yok.<br>Yukarıdan “+ Sipariş”e bas.</div>';
+  list.forEach(o=>{
+    const d=document.createElement('div');
+    const st={queued:['KUYRUKTA','#ff4d00'],assigned:['ATANDI','#2563eb'],picked:['YOLDA','#7c3aed'],delivered:['TESLİM','#16a34a']}[o.status];
+    d.className=`ticket bg-white border-[1.5px] border-[#1c1a15] rounded-2xl p-2.5 cursor-pointer text-xs ${selectedOrderId===o.id?'order-sel':''} ${o.status==='queued'?'blink':''}`;
+    d.innerHTML=`<div class="flex justify-between items-center gap-2"><b>#${o.id} • ${o.restName}</b><span class="font-extrabold" style="color:${st[1]}">${st[0]}</span></div>
+      <div class="mt-0.5 font-bold text-[11px] bg-[#f4eee1] inline-block px-1.5 py-0.5 rounded-md">${o.zone}</div>
+      <div class="opacity-70 mt-0.5">📍 ${o.addr}</div>
+      <div class="opacity-70">${money(o.amount)} • ${o.pay}${o.courierName?' • 🛵 '+o.courierName:''}</div>
+      ${o.status==='queued'?`<button data-act="auto" class="btn-ink mt-1.5 w-full bg-[#ff4d00] text-white font-extrabold py-1.5 rounded-xl">⚡ Otomatik Ata</button>`:''}`;
+    d.onclick=()=>{ selectedOrderId=o.id; render(KX.state); };
+    const btn=d.querySelector('[data-act="auto"]'); if(btn) btn.onclick=(e)=>{ e.stopPropagation(); autoDispatch(o.id); };
+    box.appendChild(d); pop(d);
+  });
+
+  // kuryeler
+  const cl=document.getElementById('courierList'); cl.innerHTML='';
+  const sel=s.orders.find(o=>o.id===selectedOrderId);
+  s.couriers.forEach(c=>{
+    const d=document.createElement('div');
+    d.className='bg-white border-[1.5px] border-[#1c1a15] rounded-2xl p-2.5 text-xs';
+    d.style.boxShadow='4px 4px 0 #1c1a15';
+    let score='';
+    if(sel&&sel.status==='queued'&&c.online){ const sc=scoreCourier(c,sel); score=`<span class="bg-[#1c1a15] text-white px-1.5 py-0.5 rounded-md font-bold">skor ${sc.total} • ${sc.dist}km</span>`; }
+    const dotC=!c.online?'⚪':c.load>=2?'🟣':'🟢';
+    d.innerHTML=`<div class="flex items-center gap-2"><span class="w-8 h-8 rounded-full bg-[#ffc531] border-[1.5px] border-[#1c1a15] flex items-center justify-center font-extrabold text-[11px]">${INITIALS[c.id]}</span>
+      <div><b>${c.name}</b><div class="opacity-60">${dotC} ${c.status} • yük:${c.load} • ★${c.perf}</div></div>
+      <span class="ml-auto">${score}</span></div>
+      <div class="flex gap-1.5 mt-1.5">
+      ${sel&&sel.status==='queued'&&c.online?`<button data-assign class="btn-ink flex-1 bg-[#0c3b2e] text-white font-extrabold py-1.5 rounded-xl">👆 #${sel.id} ata</button>`:''}
+      <button data-toggle class="btn-ink flex-1 ${c.online?'bg-white':'bg-[#ffc531]'} font-bold py-1.5 rounded-xl">${c.online?'pasife al':'aktife al'}</button></div>`;
+    const ab=d.querySelector('[data-assign]'); if(ab) ab.onclick=()=>assign(sel.id,c.id,false);
+    d.querySelector('[data-toggle]').onclick=()=>KX.commit(st=>{ const x=st.couriers.find(y=>y.id===c.id); x.online=!x.online; x.status=!x.online?'offline':(x.load===0?'boşta':'meşgul'); }, `${c.name} ${c.online?'pasife alındı':'aktife alındı'}`);
+    cl.appendChild(d);
+  });
+
+  // log
+  const lg=document.getElementById('log'); lg.innerHTML=s.log.map(l=>`<div><span style="opacity:.5">${l.at}</span> ${l.msg}</div>`).join('')||'<div style="opacity:.5">henüz hareket yok</div>';
+
+  // harita
+  s.couriers.forEach(c=>{
+    const ic=courierIcon(c);
+    if(!marks.c[c.id]) marks.c[c.id]=L.marker([c.lat,c.lng],{icon:ic}).addTo(map);
+    else{ marks.c[c.id].setLatLng([c.lat,c.lng]); marks.c[c.id].setIcon(ic); }
+    marks.c[c.id].bindPopup(`<b>${c.name}</b><br>yük:${c.load} • ★${c.perf} • ${c.status}`);
+  });
+  s.orders.filter(o=>o.status!=='delivered').forEach(o=>{
+    if(!marks.o[o.id]) marks.o[o.id]=L.marker([o.dlat,o.dlng],{icon:ICON.dest}).addTo(map);
+    marks.o[o.id].bindPopup(`<b>#${o.id}</b> ${o.zone}<br>${o.addr}<br>${o.status}${o.courierName?'<br>🛵 '+o.courierName:''}`);
+  });
+  Object.keys(marks.o).forEach(id=>{ if(!s.orders.find(o=>o.id==id&&o.status!=='delivered')){ map.removeLayer(marks.o[id]); delete marks.o[id]; } });
+}
+
+document.querySelectorAll('#zones button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#zones button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); zoneFilter=b.dataset.z; render(KX.state); });
+setInterval(()=>{ document.getElementById('clock').textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}); },1000);
+// kuryeler hafifçe gezinir (sadece bu sekme sürükler, state üzerinden yayılır)
+setInterval(()=>{
+  let moved=false;
+  KX.state.couriers.forEach(c=>{ if(c.online&&Math.random()>0.4){ c.lat+=(Math.random()-0.5)*0.001; c.lng+=(Math.random()-0.5)*0.001; moved=true; } });
+  if(moved) KX.pingLocation(KX.state.couriers[0].id, KX.state.couriers[0].lat, KX.state.couriers[0].lng);
+},4000);
+
+KX.subscribe(render);
+if(!KX.state.orders.length&&!KX.state.log.length){ KX.commit(()=>{}, '✅ Masa açıldı — Torbalı Mah. + Cumhuriyet + Tepeköy, 4 kurye bağlı.'); simulateOrder(); }
+</script>
+</body>
+</html>

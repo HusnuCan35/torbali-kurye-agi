@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Torbalı Kurye Ağı — Prototip</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  body{ background:#f4eee1; color:#1c1a15; font-family:Inter,sans-serif; background-image:radial-gradient(#d8cfb8 1px,transparent 1px); background-size:22px 22px; }
+  .display{ font-family:"Bricolage Grotesque",sans-serif; } .hand{ font-family:Caveat,cursive; }
+  .card{ background:#fffdf7; border:1.5px solid #1c1a15; border-radius:20px; box-shadow:6px 6px 0 #1c1a15; transition:transform .15s; }
+  .card:hover{ transform:translate(-2px,-2px); box-shadow:8px 8px 0 #1c1a15; }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+<div class="max-w-4xl w-full">
+  <div class="text-center">
+    <div class="inline-block bg-[#1c1a15] text-white text-xs font-bold px-3 py-1 rounded-full">TORBALI • İZMİR • PROTOTİP v0.2</div>
+    <div class="display font-extrabold text-5xl mt-3">Torbalı Kurye Ağı 🛵</div>
+    <p class="hand text-2xl opacity-70">Torbalı Mah. • Cumhuriyet Mah. • Tepeköy Mah. — tek masa, dört kurye</p>
+  </div>
+  <div class="grid md:grid-cols-2 gap-5 mt-6">
+    <a href="admin.html" class="card p-7 block">
+      <div class="text-4xl">🗺️</div>
+      <div class="display font-extrabold text-2xl mt-2">Operasyon Masası</div>
+      <p class="text-sm opacity-70 mt-1">Mahalle filtreli kuyruk, yakınlık skorlu otomatik atama, manuel ata, canlı günlük. Ozan, Hüsnü Can, Muhammet, Mert burada.</p>
+      <div class="mt-4 inline-block bg-[#ff4d00] text-white font-extrabold text-sm px-4 py-2 rounded-xl border-[1.5px] border-[#1c1a15]">Masayı aç →</div>
+    </a>
+    <a href="kurye.html" class="card p-7 block">
+      <div class="text-4xl">📱</div>
+      <div class="display font-extrabold text-2xl mt-2">Kurye Telefonu</div>
+      <p class="text-sm opacity-70 mt-1">Adını seç, masadan gelen atamayı anında al, aldım / teslim ettim de. İki sekme birbirine bağlı.</p>
+      <div class="mt-4 inline-block bg-[#0c3b2e] text-white font-extrabold text-sm px-4 py-2 rounded-xl border-[1.5px] border-[#1c1a15]">Telefonu aç →</div>
+    </a>
+  </div>
+  <div class="card mt-5 p-5 text-sm">
+    <b class="display">60 saniyelik senkron turu</b>
+    <ol class="list-decimal ml-5 mt-1 space-y-1 opacity-80 text-[13px]">
+      <li>Masayı + telefonu <b>iki ayrı sekmede</b> aç.</li>
+      <li>Telefonda adını seç (örn. Ozan Şen). Masada “+ Sipariş” → “Otomatik Ata”.</li>
+      <li>Atama sana düşerse telefonda popup çalar. Kabul et → Aldım → Teslim Et.</li>
+      <li>Masanın haritası ve günlüğü <b>aynı saniye</b> güncellenir.</li>
+    </ol>
+    <div class="text-[12px] mt-2 opacity-70">Harita gri görünürse: haritanın sağ üst katman düğmesinden <b>sağlayıcı değiştir</b> (bazı ağlar openstreetmap.org'u engeller, CARTO/OSM-DE/Esri arasında geçiş var). En sağlıklısı <b>BASLAT.bat</b> ile http üzerinden açmak.</div>
+  </div>
+</div>
+</body>
+</html>

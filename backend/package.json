@@ -1,0 +1,15 @@
+{
+  "name": "kuryex-backend",
+  "version": "0.1.0",
+  "description": "KuryeX MVP backend iskeleti - Faz 1'de NestJS'e tasinacak",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5",
+    "cors": "^2.8.5"
+  }
+}

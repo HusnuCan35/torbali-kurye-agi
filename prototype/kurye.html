@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kurye Telefonu — Torbalı Kurye Ağı</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="./shared.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/motion@11.13.1/dist/motion.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#1c1a15; --paper:#fffdf7; --cream:#f4eee1; --orange:#ff4d00; --moss:#0c3b2e; --sun:#ffc531; }
+  body{ background:var(--cream); color:var(--ink); font-family:Inter,sans-serif; background-image:radial-gradient(#d8cfb8 1px,transparent 1px); background-size:22px 22px; }
+  .display{ font-family:"Bricolage Grotesque",sans-serif; } .hand{ font-family:Caveat,cursive; }
+  .phone{ width:390px; max-width:94vw; height:800px; max-height:94vh; background:var(--paper); border:2px solid var(--ink); border-radius:34px; box-shadow:8px 8px 0 var(--ink); overflow:hidden; position:relative; display:flex; flex-direction:column; }
+  .btn-ink{ border:1.5px solid var(--ink); box-shadow:3px 3px 0 var(--ink); transition:transform .12s, box-shadow .12s; }
+  .btn-ink:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink); }
+  #miniMap{ height:270px; z-index:0; background:#e9e2d2; }
+  .chip.active{ background:var(--ink); color:#fff; }
+  .shake{ animation:shake .45s infinite; } @keyframes shake{ 0%,100%{transform:rotate(-1deg)} 50%{transform:rotate(1deg)} }
+  .slide-up{ animation:up .32s cubic-bezier(.22,1,.36,1); } @keyframes up{ from{transform:translateY(50px);opacity:0} to{transform:none;opacity:1} }
+  .shop-tip{ background:#1c1a15 !important; color:#f4eee1 !important; border:1.5px solid #f4eee1 !important; border-radius:999px !important; font-size:10px !important; font-weight:700 !important; padding:1px 8px !important; box-shadow:2px 2px 0 rgba(0,0,0,.35) !important; font-family:Inter,sans-serif; }
+  .shop-tip::before{ display:none !important; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 gap-3">
+
+<div class="text-center">
+  <div class="display font-extrabold text-2xl">📱 Kurye telefonu <span class="text-xs bg-[#0c3b2e] text-white px-2 py-1 rounded-full align-middle">PANELLE SENKRON</span></div>
+  <div class="hand text-xl opacity-70">ben kimim? aşağıdan adını seç — panel seni bulsun</div>
+  <div class="text-xs opacity-60"><a href="index.html" class="underline">← seçici</a> • <a href="admin.html" target="_blank" class="underline">masayı aç ↗</a> • ikisini yan yana koyup dene</div>
+</div>
+
+<!-- KİMLİK SEÇİCİ -->
+<div id="meRow" class="flex flex-wrap justify-center gap-2 max-w-2xl"></div>
+
+<div class="flex flex-wrap justify-center items-start gap-6">
+<div class="phone">
+  <div class="px-5 pt-4 pb-2 flex justify-between text-[11px] opacity-60"><span id="phoneClock">--:--</span><span>Torbalı saha • GPS ●</span></div>
+  <div class="mx-3 bg-[#1c1a15] text-white rounded-2xl px-4 py-3 flex items-center gap-3">
+    <div id="avatar" class="w-11 h-11 rounded-2xl bg-[#ffc531] text-[#1c1a15] flex items-center justify-center font-extrabold display text-lg border-2 border-white">OŞ</div>
+    <div class="flex-1"><div id="meName" class="font-bold text-sm">Ozan Şen</div><div id="meSub" class="text-[11px] opacity-70">Torbalı operasyonu</div></div>
+    <button id="onlineBtn" onclick="toggleOnline()" class="btn-ink text-xs font-extrabold px-3 py-2 rounded-full bg-green-400 text-black">ONLINE</button>
+  </div>
+
+  <div class="grid grid-cols-3 gap-2 mx-3 mt-2 text-center">
+    <div class="border-[1.5px] border-[#1c1a15] rounded-2xl bg-white py-2" style="box-shadow:3px 3px 0 #1c1a15"><div id="earn" class="display font-extrabold">0 ₺</div><div class="text-[10px] opacity-60">bugün</div></div>
+    <div class="border-[1.5px] border-[#1c1a15] rounded-2xl bg-white py-2" style="box-shadow:3px 3px 0 #1c1a15"><div id="cnt" class="display font-extrabold">0</div><div class="text-[10px] opacity-60">teslim</div></div>
+    <div class="border-[1.5px] border-[#1c1a15] rounded-2xl bg-white py-2" style="box-shadow:3px 3px 0 #1c1a15"><div id="load" class="display font-extrabold">0</div><div class="text-[10px] opacity-60">üstümde</div></div>
+  </div>
+
+  <div class="mx-3 mt-2 rounded-2xl overflow-hidden border-[1.5px] border-[#1c1a15] relative">
+    <div id="miniMap"></div>
+    <button onclick="drawRoute()" class="btn-ink absolute bottom-2 left-2 right-2 bg-[#1c1a15] text-white text-xs font-bold py-2 rounded-xl">🧭 Dahili haritada rota çiz</button>
+  </div>
+
+  <div id="task" class="flex-1 m-3 border-[1.5px] border-dashed border-[#1c1a15] rounded-2xl p-3 overflow-y-auto bg-[#fbf7ec]"></div>
+
+  <div class="grid grid-cols-4 text-center text-[10px] border-t-[1.5px] border-[#1c1a15] py-2 bg-white">
+    <div class="font-extrabold">🏠<br>Görev</div><div class="opacity-50">💰<br>Cüzdan</div><div class="opacity-50">🎙️<br>Telsiz</div><div class="opacity-50">⚙️<br>Ayar</div>
+  </div>
+
+  <div id="popup" class="hidden absolute inset-0 bg-black/70 items-end justify-center p-4" style="display:none;">
+    <div class="slide-up w-full bg-[#fffdf7] border-2 border-[#ff4d00] rounded-3xl p-5 shake" style="box-shadow:6px 6px 0 #ff4d00">
+      <div class="text-center text-[#ff4d00] font-extrabold text-sm">🔔 YENİ PAKET <span id="timer" class="bg-[#ff4d00] text-white px-2 py-0.5 rounded-full">30</span></div>
+      <div id="popTitle" class="mt-2 font-extrabold display"></div>
+      <div id="popAddr" class="text-xs opacity-70"></div>
+      <div class="text-xs mt-1">💰 Hakediş <b class="text-green-700">45 ₺ + km</b></div>
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <button onclick="reject()" class="btn-ink bg-white font-bold rounded-2xl py-3 text-sm">Reddet</button>
+        <button onclick="accept()" class="btn-ink bg-green-400 font-extrabold rounded-2xl py-3">KABUL ET</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="max-w-sm bg-[#fffdf7] border-[1.5px] border-[#1c1a15] rounded-2xl p-5 text-sm space-y-2" style="box-shadow:5px 5px 0 #1c1a15">
+  <b class="display">Senkron test turu (1 dk)</b>
+  <ol class="list-decimal ml-5 text-[13px] space-y-1.5 opacity-80">
+    <li>Yukarıdan adını seç (örn. <b>Ozan Şen</b>).</li>
+    <li>Masada (admin) “+ Sipariş”e bas → “Otomatik Ata”ya bas.</li>
+    <li>Sipariş sana düşerse bu telefonda <b>popup + sayaç</b> belirir. Başkasına düşerse onun adını seçip gör.</li>
+    <li>Kabul et → <b>Aldım → Teslim Ettim</b> bas. Masanın haritasında ve günlüğünde anında göründüğünü izle.</li>
+    <li>Telefonu offline yap → masa seni atama dışı bırakır.</li>
+  </ol>
+  <div class="text-[11px] bg-[#f4eee1] border border-dashed border-[#1c1a15] rounded-xl p-2">Teknik: iki sekme <b>BroadcastChannel + localStorage</b> ile aynı state'i paylaşır. Sunucu gerekmez; ama <b>BASLAT.bat</b> ile http üzerinden açmak en sağlıklısı.</div>
+</div>
+</div>
+
+<script>
+const INITIALS = { K1:'OŞ', K2:'HÇ', K3:'Mİ', K4:'MU' };
+const RESTAURANTS = [
+  { id:'R1', name:'Burger Ding', zone:'Tepeköy Mah.', lat:38.1483, lng:27.3598, addr:'Tepeköy, Hükümet Cd. No:3' },
+  { id:'R2', name:'Naydanoz Döner', zone:'Torbalı Mah.', lat:38.1522, lng:27.3485, addr:'Ertuğrul, Kazım Dirik Cd. No:61 D:B' },
+  { id:'R3', name:'Beybos Döner', zone:'Torbalı Mah.', lat:38.1531, lng:27.3470, addr:'Ertuğrul, Kazım Dirik Cd. No:82/A' },
+  { id:'R4', name:'Komadene Çiğköfte', zone:'Tepeköy Mah.', lat:38.1438, lng:27.3633, addr:'Tepeköy, İsmetpaşa Cd. No:50' },
+];
+let me = KX.me();
+let pendingId = null, timerInt = null, tLeft = 30;
+const seenAssigned = new Set();
+
+const map = L.map('miniMap', { zoomControl:false }).setView([38.1498,27.3555], 14);
+const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains:'abcd', maxZoom:20, attribution:'© OSM © CARTO' });
+const osmDE = L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', { maxZoom:19 });
+carto.addTo(map);
+L.control.layers({ 'Şık (CARTO)':carto, 'Sade (OSM-DE)':osmDE }).addTo(map);
+carto.on('tileerror', ()=>{ try{ map.removeLayer(carto); osmDE.addTo(map); }catch(e){} });
+function restIcon(){
+  return L.divIcon({ html:`<div style="background:#ff4d00;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #1c1a15;box-shadow:2px 2px 0 #1c1a15;transform:translate(-50%,-50%)">🍔</div>`, iconSize:[0,0] });
+}
+RESTAURANTS.forEach(r=>L.marker([r.lat,r.lng],{icon:restIcon()}).addTo(map)
+  .bindPopup('<b>'+r.name+'</b><br>'+r.addr+'<br><span style="opacity:.6">35860 Torbalı/İzmir</span>')
+  .bindTooltip(r.name,{permanent:true,direction:'top',offset:[0,-22],className:'shop-tip'}));
+
+let marks={}, destMark=null, route=null;
+function courierPos(c){ return [c.lat, c.lng]; }
+function courierPill(x, isMe){
+  const col = !x.online ? '#a8a29e' : x.load>=2 ? '#7c3aed' : '#16a34a';
+  const first = x.name.split(' ')[0];
+  return L.divIcon({ html:`<div style="display:flex;align-items:center;gap:4px;background:${isMe?'#1c1a15':'#fffdf7'};color:${isMe?'#ffc531':'#1c1a15'};border:2px solid ${isMe?'#ff4d00':'#1c1a15'};border-radius:999px;padding:3px 9px 3px 6px;font-size:11px;font-weight:800;box-shadow:2px 2px 0 rgba(0,0,0,.4);white-space:nowrap;transform:translate(-50%,-50%)"><span style="width:9px;height:9px;border-radius:50%;background:${col};display:inline-block"></span>🛵 ${first}${isMe?' (sen)':''}</div>`, iconSize:[0,0] });
+}
+
+function renderMeRow(s){
+  const row=document.getElementById('meRow'); row.innerHTML='';
+  s.couriers.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='chip btn-ink text-sm font-bold px-4 py-2 rounded-full bg-white'+(c.id===me?' active':'');
+    b.textContent=`${c.online?'🟢':'⚪'} ${c.name}`;
+    b.onclick=()=>{ me=c.id; KX.setMe(me); renderAll(KX.state); };
+    row.appendChild(b);
+  });
+}
+
+function myOrders(s){ return s.orders.filter(o=>o.courierId===me && o.status!=='delivered'); }
+
+function renderAll(s){
+  renderMeRow(s);
+  const c=s.couriers.find(x=>x.id===me);
+  document.getElementById('meName').textContent=c.name;
+  document.getElementById('avatar').textContent=INITIALS[c.id];
+  const ob=document.getElementById('onlineBtn');
+  ob.textContent=c.online?'ONLINE':'OFFLINE';
+  ob.className='btn-ink text-xs font-extrabold px-3 py-2 rounded-full '+(c.online?'bg-green-400 text-black':'bg-[#ffc531] text-black');
+
+  const mine=s.orders.filter(o=>o.courierId===me&&o.status==='delivered');
+  document.getElementById('earn').textContent=(mine.length*53).toLocaleString('tr-TR')+' ₺';
+  document.getElementById('cnt').textContent=mine.length;
+  document.getElementById('load').textContent=c.load;
+
+  // yeni atama bana mı geldi? popup
+  s.orders.forEach(o=>{
+    if(o.courierId===me&&o.status==='assigned'&&!seenAssigned.has(o.id)){
+      seenAssigned.add(o.id);
+      if(!pendingId) showPopup(o);
+    }
+  });
+
+  // görev kartı
+  const t=document.getElementById('task');
+  const act=myOrders(s);
+  if(!act.length){ t.innerHTML=`<div class="text-center py-5"><div class="text-4xl">🛵</div><div class="display font-extrabold mt-1">Sipariş bekleniyor…</div><div class="text-xs opacity-60">Masa sana atayınca burada çalar.<br>Şu an <b>${c.name}</b> olarak izliyorsun.</div></div>`; }
+  else{
+    const o=act[0];
+    t.innerHTML=`<div class="text-[11px] opacity-60">Aktif görev #${o.id} • ${o.restName} • ${o.zone}</div>
+      <div class="display font-extrabold">📍 ${o.addr}</div>
+      <div class="text-xs opacity-70">💳 ${o.pay} • ${o.amount} ₺ sepet</div>
+      <div class="mt-2 space-y-2">
+        <button onclick="step('picked')" class="btn-ink w-full text-left text-sm font-extrabold py-3 px-4 rounded-2xl ${o.status==='assigned'?'bg-green-400':'bg-white opacity-60'}">${o.status==='assigned'?'→ Paket Aldım (restorandayım)':'✓ Paket alındı'}</button>
+        <button onclick="step('delivered')" class="btn-ink w-full text-left text-sm font-extrabold py-3 px-4 rounded-2xl ${o.status!=='assigned'?'bg-[#1c1a15] text-white':'bg-white opacity-40'}">→ Teslim Ettim ✅</button>
+      </div>`;
+  }
+
+  // harita: ekipteki herkes ismiyle görünür, ben vurgulu
+  s.couriers.forEach(x=>{
+    const isMe = x.id===me;
+    if(!marks[x.id]) marks[x.id]=L.marker(courierPos(x),{icon:courierPill(x,isMe)}).addTo(map);
+    else{ marks[x.id].setLatLng(courierPos(x)); marks[x.id].setIcon(courierPill(x,isMe)); }
+    marks[x.id].bindPopup(`<b>${x.name}</b>${isMe?' (sen)':''}<br>yük:${x.load} • ${x.status}`);
+  });
+  const target=act[0];
+  if(target){ if(!destMark) destMark=L.marker([target.dlat,target.dlng]).addTo(map); else destMark.setLatLng([target.dlat,target.dlng]); destMark.bindPopup('#'+target.id+' '+target.addr); }
+  else if(destMark){ map.removeLayer(destMark); destMark=null; if(route){map.removeLayer(route); route=null;} }
+}
+
+function showPopup(o){
+  pendingId=o.id;
+  document.getElementById('popTitle').textContent=`#${o.id} ${o.restName} — ${o.zone}`;
+  document.getElementById('popAddr').textContent='Teslimat: '+o.addr;
+  const p=document.getElementById('popup'); p.classList.remove('hidden'); p.style.display='flex';
+  tLeft=30; document.getElementById('timer').textContent=tLeft;
+  clearInterval(timerInt);
+  timerInt=setInterval(()=>{ tLeft--; document.getElementById('timer').textContent=tLeft; if(tLeft<=0){ clearInterval(timerInt); hidePopup(); } },1000);
+}
+function hidePopup(){ pendingId=null; const p=document.getElementById('popup'); p.classList.add('hidden'); p.style.display='none'; }
+function accept(){
+  clearInterval(timerInt);
+  const id=pendingId; hidePopup();
+  KX.commit(s=>{ const o=s.orders.find(x=>x.id===id); if(o&&o.status==='assigned'){ /* kurye kabul etti, panelde picked'e hazır */ } }, `📱 ${KX.state.couriers.find(c=>c.id===me).name} #${id} kabul etti.`);
+  renderAll(KX.state);
+}
+function reject(){
+  clearInterval(timerInt);
+  const id=pendingId; hidePopup();
+  // Red: siparişi kuyruğa iade et, sıradaki kuryeye geçsin
+  KX.commit(s=>{
+    const o=s.orders.find(x=>x.id===id); if(!o) return;
+    const c=s.couriers.find(x=>x.id===o.courierId); if(c){ c.load=Math.max(0,c.load-1); c.status=c.load===0?'boşta':'meşgul'; }
+    o.status='queued'; o.courierId=null; o.courierName=null;
+  }, `📱 #${id} reddedildi → kuyruğa iade.`);
+}
+function step(to){
+  const act=myOrders(KX.state)[0]; if(!act) return;
+  KX.commit(s=>{
+    const o=s.orders.find(x=>x.id===act.id); if(!o) return;
+    if(to==='picked'){ o.status='picked'; }
+    if(to==='delivered'){
+      o.status='delivered'; o.deliveredAt=Date.now();
+      const c=s.couriers.find(x=>x.id===me); if(c){ c.load=Math.max(0,c.load-1); c.status=c.load===0?'boşta':'meşgul'; }
+      s.delivered++; s.revenue+=80;
+    }
+  }, to==='picked'?`📦 #${act.id} alındı (${act.restName}).`:`✅ #${act.id} TESLİM (kurye telefonu).`);
+}
+function toggleOnline(){
+  KX.commit(s=>{ const c=s.couriers.find(x=>x.id===me); c.online=!c.online; c.status=!c.online?'offline':(c.load===0?'boşta':'meşgul'); }, '');
+}
+function drawRoute(){
+  const act=myOrders(KX.state)[0]; if(!act) return;
+  const c=KX.state.couriers.find(x=>x.id===me);
+  const r=RESTAURANTS.find(x=>x.id===act.restId);
+  if(route) map.removeLayer(route);
+  const pts=[[c.lat,c.lng]];
+  if(r) pts.push([r.lat,r.lng]);
+  pts.push([act.dlat,act.dlng]);
+  route=L.polyline(pts,{color:'#ff4d00',weight:5}).addTo(map);
+  map.fitBounds(route.getBounds());
+}
+
+setInterval(()=>{ document.getElementById('phoneClock').textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}); },1000);
+// konumu hafif gezdir (senkron yayılır)
+setInterval(()=>{
+  KX.commit(s=>{ const c=s.couriers.find(x=>x.id===me); if(c&&c.online){ c.lat+=(Math.random()-0.5)*0.0008; c.lng+=(Math.random()-0.5)*0.0008; } });
+},5000);
+
+KX.subscribe(renderAll);
+</script>
+</body>
+</html>
