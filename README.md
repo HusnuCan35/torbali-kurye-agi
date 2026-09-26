@@ -1,4 +1,12 @@
-# 🛵 Torbalı Kurye Ağı — Proje Klasörü (v0.2)
+# 🛵 Torbalı Kurye Ağı — Proje Klasörü (v0.3)
+
+Repo: **https://github.com/HusnuCan35/torbali-kurye-agi**
+
+## Canlıya alma (Vercel, 2 dakika)
+Repo zaten Vercel uyumlu (`vercel.json` hazır, build gerektirmez):
+1. https://vercel.com/new adresine gir → **Import** → `torbali-kurye-agi` reposunu seç.
+2. Framework: **Other**, Build Command boş → **Deploy**.
+3. Açılış sayfası `/` adresinde, panel `/prototype/admin.html`, telefon `/prototype/kurye.html` adresinde yayınlanır.
 
 Bölgeler: **Torbalı Mah. • Cumhuriyet Mah. • Tepeköy Mah.**
 Kadro: **Ozan Şen • Hüsnü Can Çoban • Muhammet İşcen • Mert Uyanık**
